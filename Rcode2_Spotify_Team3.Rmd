@@ -1,0 +1,116 @@
+---
+title: "Assignment 1 - R by Team 3"
+output: pdf_document
+date: "2022-08-03"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r packages}
+library("ggplot2")
+library("magrittr")
+library("dplyr")
+library("readxl")
+```
+
+```{r}
+library(readxl)
+Spotify <- read_excel("E:/Canada/College/GBC/T405/Semester 2/4066 Introduction to Analytics Systems/Assignment 1 - R/Submitted_new/Spotify.csv")
+
+
+#1 Print the structure of your dataset
+str(Spotify)
+
+#2 List the variables in your dataset
+names(Spotify)
+
+#3 Print the top 15 rows of your dataset
+head(Spotify,n=15)
+
+#4 Write a user defined function using any of the variables from the data set
+duration_in_mins <-function(x){
+  x/60
+}
+duration_in_mins(Spotify$Duration_secs)
+
+#5 Use data manipulation techniques and filter rows based on any logical criteria that exist in your dataset
+Spotify %>% filter(Genre == "Pop")
+
+#6 Identify the dependent & independent variables and use reshaping techniques and create a new data frame by joining those variables from your dataset
+independentVar = Spotify$Popularity
+dependentVar = as.data.frame(Spotify %>% select(4:12))
+newdf = as.data.frame(cbind(dependentVar, independentVar))
+names(newdf)[10]="Popularity" 
+newdf
+
+#7 Remove missing values in your dataset
+# ONE ROW IS REMOVED WHERE ID = NULL
+spotify_fil <- Spotify %>% filter(!is.na(id))
+spotify_fil
+
+#8 Identify and remove duplicated data in your dataset
+# THREE DUPLICATE ROWS ARE REMOVED
+spotify_fil <- spotify_fil[!duplicated(spotify_fil),]
+spotify_fil
+
+#9 Reorder multiple rows in descending order
+spotify_fil %>% arrange(desc(Mode), desc(Key),desc(Danceability))
+
+#10 Rename some of the column names in your dataset
+spotify_fil %>% rename(song_id = id, song_title = Title, artist_name = Artist)
+
+#11 Add new variables in your data frame by using a mathematical function 
+spotify_fil %>% mutate(db_by_acous = dB/Acousticness)
+
+#12 Create a training set using random number generator engine.
+set.seed(1234)
+training_set <- spotify_fil %>% sample_frac(0.8, replace = FALSE)
+training_set
+
+#13 Print the summary statistics of your dataset
+summary(spotify_fil)
+
+#14 Use any of the numerical variables from the dataset and perform the following statistical functions:
+#Mean
+mean(spotify_fil$Popularity)
+
+#Median
+median(spotify_fil$Tempo)
+
+#Mode
+find_mode <- function(x) {
+  u <- unique(x)
+  tab <- tabulate(match(x, u))
+  u[tab == max(tab)]
+}
+find_mode(spotify_fil$Key)
+
+#Range
+range(spotify_fil$Energy)
+
+#15 Plot a scatter plot for any 2 variables in your dataset
+ggplot(spotify_fil , aes(x=Danceability , y=Popularity)) + 
+geom_point(size=1.3, color ="steelblue", shape=19)
+
+#16 Plot a bar plot for any 2 variables in your dataset
+ggplot(data = spotify_fil, aes (x = Genre))+geom_bar(fill = "steelblue")
+ggplot(data = spotify_fil, aes (x = Popularity))+geom_bar(fill = "steelblue")
+
+#17 Find the correlation between any 2 variables by applying least square linear regression model
+y = unlist(spotify_fil[,"Popularity"]) 
+x = unlist(spotify_fil[,"Danceability"]) 
+head(x)
+head(y)
+xycorr <-cor(x,y, method = "pearson")
+xycorr
+plot(y~x, col = x)
+model1 = lm(y~x)
+abline(model1,col = "steelblue", lwd = 3)
+
+# Github link : https://github.com/abhisheksalwan/Rcode2_Team3
+
+```
+
